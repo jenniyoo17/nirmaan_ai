@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gov-blue: #1E1B4B; /* Dark indigo for text */
+  --color-gov-light: #FDFBFF; /* Very light background */
+  --color-gov-primary: #9333EA; /* Neon purple */
+  --color-gov-secondary: #C084FC; /* Lighter purple */
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-gov-light);
+  color: var(--color-gov-blue);
+}
+
+.leaflet-container {
+  height: 400px;
+  width: 100%;
+  border-radius: 0.5rem;
+  z-index: 0;
+}
