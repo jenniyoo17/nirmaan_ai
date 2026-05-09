@@ -9,6 +9,9 @@ backend/__pycache__/
 backend/venv/
 backend/.env
 sql_app.db
+backend/static/images/*.png
+!backend/static/images/day_*.png
+!backend/static/images/building_*.png
 
 # Other
 .DS_Store

@@ -7,7 +7,7 @@ import datetime
 import shutil
 import uuid
 
-from . import models, schemas, database, ai_engine
+from . import models, schemas, database, ai_engine, image_utils
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -39,11 +39,39 @@ def read_projects(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 @app.post("/projects", response_model=schemas.Project)
 def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)):
+    # 1. Create the project
     db_project = models.Project(**project.model_dump())
     db.add(db_project)
     db.commit()
     db.refresh(db_project)
+    
+    # 2. Capture real satellite shots
+    image_paths = image_utils.save_satellite_shots(project.latitude, project.longitude)
+    
+    # 3. Create initial progress entries with these images
+    for i, path in enumerate(image_paths):
+        # We'll use the first image as 'Before' (0%) and the second as a slightly later check if applicable,
+        # but for registration, they are both basically 'Initial' state.
+        progress = models.DailyProgress(
+            project_id=db_project.id,
+            date=datetime.datetime.utcnow(),
+            image_path=path,
+            progress_percentage=0.0,
+            notes=f"Initial satellite capture (Shot {i+1}). Ready for monitoring."
+        )
+        db.add(progress)
+    
+    db.commit()
+    db.refresh(db_project)
     return db_project
+
+@app.get("/preview-satellite")
+def preview_satellite(lat: float, lng: float):
+    """Temporary endpoint to preview what the satellite will capture"""
+    # We'll just return the paths to two newly captured temp images
+    # In a real app, you might want to cleanup these temp images or just use them
+    paths = image_utils.save_satellite_shots(lat, lng)
+    return {"images": paths}
 
 @app.get("/projects/{project_id}", response_model=schemas.Project)
 def read_project(project_id: int, db: Session = Depends(get_db)):
